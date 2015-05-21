@@ -8,14 +8,14 @@ criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
 objp = np.zeros((9*6,3), np.float32)
 objp[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
-objp *= 2.26
+objp *= 26.35
 
 # Arrays to store object points and image points from all the images.
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 
 # Calibration set prefix
-filePrefix = 'calibration_image'
+filePrefix = 'calibration_image_'
 images = glob.glob(filePrefix+'*.png')
 
 for name in images:
@@ -64,13 +64,25 @@ print "Camera matrix: " + str(cameraMatrix)
 print "Distortion coefficients: " + str(distCoeffs)
 
 # Improving results:
-
+img = cv2.imread(filePrefix + 'extra' + '.png')
+h,  w = img.shape[:2]
+newcameramtx, roi=cv2.getOptimalNewCameraMatrix(cameraMatrix,distCoeffs,(w,h),1,(w,h))
 
 # Showing result:
 print "Testing..."
-src = cv2.imread(filePrefix+'_'+str(0)+'.png')
+src = cv2.imread(filePrefix+str(0)+'.png')
 #src = cv2.imread('calibration_image2.png')
-dst = cv2.undistort(src, cameraMatrix, distCoeffs)
+dst = cv2.undistort(src, cameraMatrix, distCoeffs, None, newcameramtx)
 cv2.imshow('img',dst)
 cv2.waitKey(-1)
 cv2.destroyAllWindows()
+
+# Calculating reprojection error:
+print "Calculating reprojection error..."
+tot_error = 0
+for i in xrange(len(objpoints)):
+    imgpoints2, _ = cv2.projectPoints(objpoints[i], rvecs[i], tvecs[i], cameraMatrix, distCoeffs)
+    error = cv2.norm(imgpoints[i],imgpoints2, cv2.NORM_L2)/len(imgpoints2)
+    tot_error += error
+
+print "\tTotal error: ", tot_error/len(objpoints)
