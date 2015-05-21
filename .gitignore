@@ -1,2 +1,8 @@
-*.pyc
 *.idea*
+*.pyc
+*.toc
+*.log
+*.aux
+*synctex.gz
+*.bbl
+*.blg

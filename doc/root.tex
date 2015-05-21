@@ -1,0 +1,89 @@
+\documentclass{report}
+
+
+% General imports:
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}	% For using icelandic Thorn character
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+% Support for spanish:
+\usepackage[spanish]{babel}
+
+% Imports for images
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+
+% Imports for euro symbol support
+\usepackage[official]{eurosym}
+\DeclareUnicodeCharacter{20AC}{\euro{}}
+
+% Other imports:
+\usepackage{indentfirst} % Indent first paragraph
+\usepackage[nottoc,numbib]{tocbibind} % Add bibliography to table of contents
+\usepackage{url}	% Cite URLs
+
+% Formatting margins of the pages:
+\usepackage[top=2.3cm, bottom=2.29cm, left=2cm, right=2cm]{geometry}
+
+% Import for headers
+\usepackage{fancyhdr}
+
+% Definitions of important data
+\renewcommand{\author}{David Estévez Fernández\\Enrique Fernández Rodicio\\Javier Isabel Hernández}
+\renewcommand{\title}{??}
+\newcommand{\department}{Máster Universitario de Robótica y Automatización\\Robots Móviles}
+\newcommand{\teacher}{Ramón Barber Castaño}
+
+% Define a command for comments
+\usepackage{color}
+\newcommand{\comment}[1]{\textbf{\color{red} #1}}
+
+% Each chapter will have its own header
+%\newcommand{\headchapter}[1]{\chapter{#1}\rhead{#1}}
+
+% Each section will have its own header
+%\newcommand{\headsection}[1]{\section{#1}}\rhead{#1}}
+
+% Change 'Chapter' to something more logical
+\renewcommand{\chaptername}{}
+
+% This is for writing algorithms on pseudocode (nicely)
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+% This is used for adding appendices:	
+\usepackage[toc,page]{appendix}
+
+\begin{document}
+
+%%%% FRONTPAGE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{frontpage}
+\frontpage{\department}{\title}{\author}{\teacher}
+
+% Adding some header text on top of the page:
+\lhead{}
+\chead{}
+\rhead{\title}
+\pagestyle{fancy}
+
+
+%%%%%%Table of contents%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tableofcontents
+\newpage
+
+%%%% Different Sections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%% Appendices %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{appendices}
+
+%\end{appendices}
+
+%%%% Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\newpage
+%\bibliographystyle{plain}
+%\bibliography{Bibliography.bib}
+
+\end{document}
