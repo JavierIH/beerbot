@@ -23,7 +23,7 @@ class RobotRemoteInterface:
 
     def sendChannelA(self, char):
         try:
-            self.serialPort.write( 'A' + char)
+            self.serialPort.write('A')
         except AttributeError, e:
             print 'Not connected: [' + str(e) + ']'
 
@@ -46,12 +46,6 @@ if __name__ == "__main__":
 	import time as t
 
 	interface = RobotRemoteInterface()
-	interface.connect("/dev/ttyACM0", 57600)
-	interface.sendChannelA('r')
-	interface.sendChannelB( 't')
-	t.sleep(1)
-	interface.sendChannelC('y')
-	t.sleep(1)
-	interface.sendChannelB( 't')
-	t.sleep(1)
-	interface.sendChannelC('y')
+	interface.connect("/dev/rfcomm0", 19200)
+	interface.sendChannelB(chr(0))
+	
