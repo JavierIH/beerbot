@@ -30,7 +30,7 @@ void setup()
 
 }
 
-char command;
+char command;   
 char value;
 
 void loop()
@@ -43,32 +43,20 @@ void loop()
     Serial.println(command);
     if (command == GRIPPER_ID) {
       value = Serial.read();
-      Serial.print("value ");
-      Serial.println((int)value);
-
       if (value == 'a') pinza.write(OPEN_GRIPPER);
       else if (value == 'b') pinza.write(CLOSE_GRIPPER);
-      else Serial.flush();
     }
     else if (command == LEFT_WHEEL_ID) {
       value = Serial.read();
-      Serial.print("value ");
-      Serial.println((int)value);
       izquierdo.write(LEFT_ZERO + (int)value);
     }
     else if (command == RIGHT_WHEEL_ID) {
       value = Serial.read();
-      Serial.print("value ");
-      Serial.println((int)value);
       derecho.write(RIGHT_ZERO - (int)value);
     }
-
-    Serial.flush();
+    else Serial.flush();
   }
-  else {
-    Serial.println("MAL");
-  }
-  delay(1000);
+  delay(50);
 }
 
 

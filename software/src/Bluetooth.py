@@ -1,6 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat May 23 17:32:40 2015
+
+@author: javierih
+"""
+
 import serial
 
-class RobotRemoteInterface:
+class Bluetooth:
 
     def __init__(self):
         self.serialPort = None
@@ -19,33 +26,23 @@ class RobotRemoteInterface:
 
         if not self.serialPort.isOpen():
             raise IOError("Port could not be opened!")
+            
+    def disconnect(self):
+        self.serialPort.close()
+        if self.serialPort.isOpen():
+            raise IOError("Port could not be closed!")
 
-
-    def sendChannelA(self, char):
+    def send(self, msg):
         try:
-            self.serialPort.write('A')
+            self.serialPort.write(msg)
         except AttributeError, e:
             print 'Not connected: [' + str(e) + ']'
-
-    def sendChannelB(self, char):
-        try:
-            self.serialPort.write( 'B' + char)
-        except AttributeError, e:
-            print 'Not connected: [' + str(e) + ']'
-
-    def sendChannelC(self, char):
-        try:
-            self.serialPort.write( 'C' + char)
-        except AttributeError, e:
-            print 'Not connected: [' + str(e) + ']'
-
-
 
 # If the script is run directly, this example is executed:
 if __name__ == "__main__":
 	import time as t
 
-	interface = RobotRemoteInterface()
-	interface.connect("/dev/rfcomm0", 19200)
-	interface.sendChannelB(chr(0))
+	interface = Bluetooth()
+	interface.connect("/dev/rfcomm1", 19200)
+	interface.send('B' + chr(253))
 	
