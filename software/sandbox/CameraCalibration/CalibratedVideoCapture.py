@@ -3,7 +3,18 @@ import cv2
 
 
 class CalibratedVideoCapture:
-    def __init__(self, id, camera_parameters_file):
+    def __init__(self, id=None, camera_parameters_file=None):
+        self.videoCapture = cv2.VideoCapture()
+        self.cameraMatrix = None
+        self.distCoeffs = None
+        self.newCameraMatrix = None
+        self.roi = None
+        self.opened = False
+
+        if id and camera_parameters_file:
+            self.open(id, camera_parameters_file)
+
+    def open(self, id, camera_parameters_file):
         # Start device
         self.videoCapture = cv2.VideoCapture()
         if not self.videoCapture.open(id):
@@ -16,7 +27,12 @@ class CalibratedVideoCapture:
         self.newCameraMatrix = npz_file['newCameraMatrix']
         self.roi = npz_file['roi']
 
+        self.opened = True
+
     def read(self):
+        if not self.opened:
+            raise Exception("Camera needs to be opened before read")
+
         # Read image from camera
         success, image = self.videoCapture.read()
 
@@ -36,7 +52,8 @@ class CalibratedVideoCapture:
 
 if __name__ == '__main__':
 
-    cap = CalibratedVideoCapture(1, './logitech/calibration_image.npz')
+    cap = CalibratedVideoCapture()
+    cap.open(1, './logitech/calibration_image.npz')
 
     while True:
         dummy, frame = cap.read()
