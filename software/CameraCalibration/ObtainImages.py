@@ -33,7 +33,7 @@ def main():
             return
         elif k == ord('c'):
             cv2.imwrite(filePrefix+'extra' + '.png', frame)
-        break
+            break
 
     cv2.destroyAllWindows()
 
