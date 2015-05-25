@@ -15,7 +15,7 @@ objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 
 # Calibration set prefix
-filePrefix = 'calibration_image_'
+filePrefix = 'logitech/calibration_image'
 images = glob.glob(filePrefix+'*.png')
 
 for name in images:
@@ -66,13 +66,13 @@ print "Distortion coefficients: " + str(distCoeffs)
 # Improving results:
 img = cv2.imread(filePrefix + 'extra' + '.png')
 h,  w = img.shape[:2]
-newcameramtx, roi=cv2.getOptimalNewCameraMatrix(cameraMatrix,distCoeffs,(w,h),1,(w,h))
+newCameraMatrix, roi=cv2.getOptimalNewCameraMatrix(cameraMatrix,distCoeffs,(w,h),1,(w,h))
 
 # Showing result:
 print "Testing..."
 src = cv2.imread(filePrefix+str(0)+'.png')
 #src = cv2.imread('calibration_image2.png')
-dst = cv2.undistort(src, cameraMatrix, distCoeffs, None, newcameramtx)
+dst = cv2.undistort(src, cameraMatrix, distCoeffs, None, newCameraMatrix)
 cv2.imshow('img',dst)
 cv2.waitKey(-1)
 cv2.destroyAllWindows()
@@ -86,3 +86,6 @@ for i in xrange(len(objpoints)):
     tot_error += error
 
 print "\tTotal error: ", tot_error/len(objpoints)
+
+# Save matrices:
+np.savez(filePrefix+'.npz', cameraMatrix=cameraMatrix, distCoeffs=distCoeffs, newCameraMatrix=newCameraMatrix, roi=roi)
