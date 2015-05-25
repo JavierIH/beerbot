@@ -15,7 +15,7 @@ objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 
 # Calibration set prefix
-filePrefix = 'calibration_image_'
+filePrefix = 'logitech/calibration_image'
 images = glob.glob(filePrefix+'*.png')
 
 for name in images:
@@ -88,4 +88,4 @@ for i in xrange(len(objpoints)):
 print "\tTotal error: ", tot_error/len(objpoints)
 
 # Save matrices:
-np.savez(filePrefix+'.npz', cameraMatrix=cameraMatrix, distCoeffs=distCoeffs, newCameraMatrix=newCameraMatrix)
+np.savez(filePrefix+'.npz', cameraMatrix=cameraMatrix, distCoeffs=distCoeffs, newCameraMatrix=newCameraMatrix, roi=roi)
