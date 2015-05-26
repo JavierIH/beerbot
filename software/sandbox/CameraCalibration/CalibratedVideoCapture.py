@@ -51,7 +51,6 @@ class CalibratedVideoCapture:
 
 
 if __name__ == '__main__':
-
     cap = CalibratedVideoCapture()
     cap.open(1, './logitech/calibration_image.npz')
 
