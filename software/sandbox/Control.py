@@ -3,7 +3,6 @@
 
 """
 import time
-import vrep
 import numpy as np
 from Camera import Camera
 from Beerbot import Beerbot
@@ -26,21 +25,21 @@ class Control:
 
     def getRobotPosition(self):
         "get the position of the robot"
-        x, y, orientation = self.camera.get_robot_pose()
+        x = self.camera.robot[0][0]
+        y = self.camera.robot[0][1]
         #time.sleep(0.1)
         return x, y
 
     def getRobotOrientation(self):
         "get the orientation of the robot"
-        x, y, orientation = self.camera.get_robot_pose()
+        orientation = self.camera.robot[1]
         return orientation
 
     def printRobotLocation(self):
         "print the position and orientation of the robot (x, y, yaw)"
-        pos_x, pos_y, orientation = self.camera.get_robot_pose()
-        yaw='%.2f'%(orientation)
-        x='%.2f'%(pos_x)
-        y='%.2f'%(pos_y)
+        x = self.camera.robot[0][0]
+        y = self.camera.robot[0][1]
+        yaw = self.camera.robot[1]
         print "Position: (", x,",", y, ")", "\nYaw:", yaw
 
     def getDistanceToTarget (self, x_target, y_target):
@@ -91,16 +90,6 @@ class Control:
         print "punto!"
         self.robot.move(0,0)
 
-    def getImage (self):
-        #errorCode, resolution, image=vrep.simxGetVisionSensorImage(self.clientID, self.camera, 0, vrep.simx_opmode_streaming)
-        #print "pillando imagen"
-        #time.sleep(1) #necesario
-        errorCode, resolution, image=vrep.simxGetVisionSensorImage(self.clientID, self.camera, 0, vrep.simx_opmode_oneshot_wait)
-        im=np.array(image, dtype=np.uint8)
-        im.resize([resolution[1], resolution[0],3])
-        im=np.flipud(im)
-        return im
-
 
 if __name__ == '__main__':
     #moveRobot(-0.5,0.5);4
@@ -109,7 +98,7 @@ if __name__ == '__main__':
 
     address='127.0.0.1'
     port=19999
-    simulator = Simulator(address,port)
+    #simulator = Simulator(address,port)
 
     vision = simulator.getImage()
 
