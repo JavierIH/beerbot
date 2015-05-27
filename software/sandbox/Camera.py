@@ -5,6 +5,150 @@ from CameraCalibration.CalibratedVideoCapture import CalibratedVideoCapture
 
 __author__ = 'kfrodicio'
 
+class Camera2:
+    def __init__(self, id, camera_parameters_file):
+        self.camera = CalibratedVideoCapture()
+        self.camera.open(id, camera_parameters_file)
+
+        # Thresholds:
+        self.color_threshold = { 'blue' : [(95, 110, 55), (125, 255, 243)],
+                                 'green': [(35, 47, 70),  (84, 255, 200)],
+                                 'orange':[(0, 170, 55),  (32, 255, 200)],
+                                 'brown': [(5, 5, 65),  (55, 89, 89)] }
+        self.black_threshold = 20
+
+    def getNumContours(self):
+        ret, image = self.camera.read()
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+        green_mask = self.color_segmentation(hsv, 'green')
+        blue_mask = self.color_segmentation(hsv, 'blue')
+        orange_mask = self.color_segmentation(hsv, 'brown')
+
+        green_contours = self.process_mask(cv2.bitwise_not(green_mask))
+        blue_contours = self.process_mask(blue_mask)
+
+        print 'Green contours: %d'%len(green_contours)
+        print 'Blue contours: %d'%len(blue_contours)
+        print '\n-----\n'
+
+        if len(blue_contours) > 0:
+            blue_center = self.contour_center(blue_contours[0])
+            robot_contour = None
+            robot_center = None
+            obstacles = []
+
+            for contour in green_contours:
+                if cv2.pointPolygonTest(contour, blue_center, False) >= 0:
+                    robot_contour = self.simplify_contour(contour)
+                    if robot_contour != None:
+                        robot_center = self.contour_center(robot_contour)
+                else:
+                    obstacles.append(contour)
+
+            # circles:
+            circles = []
+            obstacles_without_circles = []
+            for obstacle in obstacles:
+                circle = self.get_circle(obstacle)
+                if circle is not None:
+                    circles.append(circle)
+                else:
+                    obstacles_without_circles.append(obstacle)
+
+
+            # Debug image
+            show = image.copy()
+            if robot_center != None and robot_contour != None:
+
+                cv2.circle(show, robot_center,3, (255, 0, 255), 2)
+                cv2.drawContours(show, [robot_contour], -1, (255, 0, 255), 2)
+
+                orient_vector = np.array(blue_center) - np.array(robot_center)
+                cv2.line(show, robot_center, tuple(robot_center+orient_vector*3), (255, 255, 0), 2)
+
+            if obstacles_without_circles:
+                cv2.drawContours(show, obstacles_without_circles, -1, (0, 255, 255), 2)
+
+            if circles:
+                for (x, y), r in circles:
+                    cv2.circle(show, (int(x), int(y)), int(r), (255, 0, 0), 2)
+
+            cv2.imshow("robot", show)
+
+    def color_segmentation(self, hsv_image, color):
+        """
+            Input: hsv image, name of the color
+            Output: blue contours (filtered by size)
+        """
+        thresholds = self.color_threshold[color]
+        mask = cv2.inRange(hsv_image, thresholds[0], thresholds[1])
+        cv2.imshow(color, mask)
+        return mask
+
+    def black_segmentation(self, hsv_image):
+        """
+            Input: hsv image
+            Output: black contours (filtered by size)
+        """
+        dummy, thresholded_mask = cv2.threshold(hsv_image[:,:,2], 50, 255, cv2.THRESH_BINARY_INV) #+cv2.THRESH_OTSU)
+        adaptive_threshold_mask = cv2.adaptiveThreshold(hsv_image[:,:,2],255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,11,2)
+        black_mask = cv2.bitwise_and(thresholded_mask, adaptive_threshold_mask)
+        cv2.imshow("black", black_mask)
+        return black_mask
+
+    def process_mask(self, mask, kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))):
+        """
+            Input: binary mask, kernel size for closing
+            Output: filtered contours contained in image
+        """
+        filtered_mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+        contours, dummy = cv2.findContours(filtered_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        contours_filtered = []
+        for contour in contours:
+            if len(contour) > 20 and cv2.contourArea(contour) > 150:
+                contours_filtered.append(contour)
+
+        contours_filtered.sort(key=lambda x: cv2.contourArea(x))
+        contours_filtered.reverse()
+
+        return contours_filtered
+
+    def simplify_contour(self, contour):
+        perimeter = cv2.arcLength(contour,True)
+        approx = cv2.approxPolyDP(contour,0.12*perimeter,True)
+
+        if len(approx) == 4 and cv2.isContourConvex(approx):
+            return approx
+        else:
+            return None
+
+    def contour_center(self, contour):
+        M = cv2.moments(contour)
+        cx = int(M['m10']/M['m00'])
+        cy = int(M['m01']/M['m00'])
+        return (cx, cy)
+
+    def dist(self, a, b):
+        return np.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2)
+
+    def get_circle(self, contour):
+        # Compare max and min enclosing circles to check that the contour is circular
+        ( center, r) = cv2.minEnclosingCircle(contour)
+        (x,y),(h, w),angle = cv2.fitEllipse(contour)
+
+        if abs(h - w) < 30:
+            # Ellipse is a circle
+            if self.dist(center, (x + h/2, y + h/2) ) < 30:
+                # Centers are close
+                if abs(r - (h + w) / 4) < 20:
+                    # Similar radius
+                    return center, r
+
+        return None
+
+
 
 class Camera:
     def __init__(self, id, camera_parameters_file):
@@ -28,7 +172,7 @@ class Camera:
         dummy, thresholded_mask = cv2.threshold(hsv_image[:,:,2], 50, 255, cv2.THRESH_BINARY_INV) #+cv2.THRESH_OTSU)
         adaptive_threshold_mask = cv2.adaptiveThreshold(hsv_image[:,:,2],255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV,11,2)
         black_mask = cv2.bitwise_and(thresholded_mask, adaptive_threshold_mask)
-        #cv2.imshow("black", black_mask)
+        cv2.imshow("black_threshold", thresholded_mask)
         return cv2.morphologyEx(black_mask, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)) )
 
     def get_binary_map(self):
@@ -106,3 +250,20 @@ class Camera:
             else:
                 ang += 180
                 return 360-ang
+
+
+def main():
+    camera = Camera2(1, './CameraCalibration/logitech/calibration_image.npz')
+    while 1:
+        #x, y, orientation, contours= camera.get_robot_pose()
+        camera.getNumContours()
+        k = cv2.waitKey(1) & 0xFF
+        if k == ord('q'):
+            break
+
+        #print('posicion: ', x, y)
+        #print('orientacion: ', orientation)
+
+
+if __name__ == '__main__':
+    main()
