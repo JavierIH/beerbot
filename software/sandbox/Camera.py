@@ -17,14 +17,18 @@ class Camera2:
                                  'brown': [(5, 5, 65),  (55, 89, 89)] }
         self.black_threshold = 20
 
+        self.image = None
+
         self.obstacles = None
         self.obstacles_without_targets = None
         self.targets = None
         self.robot = None
 
+        self.debug = True # Set to false to disable debug
+
     def process_image(self):
-        ret, image = self.camera.read()
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        ret, self.image = self.camera.read()
+        hsv = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
 
         green_mask = self.color_segmentation(hsv, 'green')
         blue_mask = self.color_segmentation(hsv, 'blue')
@@ -62,22 +66,23 @@ class Camera2:
 
 
             # Debug image
-            show = image.copy()
-            if robot_center != None and robot_contour != None:
+            if self.debug:
+                show = self.image.copy()
+                if robot_center != None and robot_contour != None:
 
-                cv2.circle(show, robot_center,3, (255, 0, 255), 2)
-                cv2.drawContours(show, [robot_contour], -1, (255, 0, 255), 2)
+                    cv2.circle(show, robot_center,3, (255, 0, 255), 2)
+                    cv2.drawContours(show, [robot_contour], -1, (255, 0, 255), 2)
 
-                cv2.line(show, robot_center, tuple(robot_center+orient_vector*3), (255, 255, 0), 2)
+                    cv2.line(show, robot_center, tuple(robot_center+orient_vector*3), (255, 255, 0), 2)
 
-            if self.obstacles_without_targets:
-                cv2.drawContours(show,self.obstacles_without_targets, -1, (0, 255, 255), 2)
+                if self.obstacles_without_targets:
+                    cv2.drawContours(show,self.obstacles_without_targets, -1, (0, 255, 255), 2)
 
-            if self.targets:
-                for (x, y), r in self.targets:
-                    cv2.circle(show, (int(x), int(y)), int(r), (255, 0, 0), 2)
+                if self.targets:
+                    for (x, y), r in self.targets:
+                        cv2.circle(show, (int(x), int(y)), int(r), (255, 0, 0), 2)
 
-            cv2.imshow("robot", show)
+                cv2.imshow("robot", show)
 
     def color_segmentation(self, hsv_image, color):
         """
@@ -138,9 +143,10 @@ class Camera2:
 
     def get_circle(self, contour):
         # Compare max and min enclosing circles to check that the contour is circular
+        # If it is circular, it returns the circle data, otherwise, returns 0
         ( center, r) = cv2.minEnclosingCircle(contour)
         (x,y),(h, w),angle = cv2.fitEllipse(contour)
-
+        
         if abs(h - w) < 30:
             # Ellipse is a circle
             if self.dist(center, (x + h/2, y + h/2) ) < 30:
@@ -151,7 +157,22 @@ class Camera2:
 
         return None
 
+    def get_circle2(self, contour):
+        (center, r) = cv2.minEnclosingCircle(contour)
+        circle_area = np.pi * r**2
+        contour_area = cv2.contourArea(contour)
+        if abs((np.true_divide(circle_area,contour_area) -1)) < 0.7:
+            return center, r
 
+        return None
+
+    def get_map(self):
+        h, w, channels = self.image.shape
+        binary_map = np.zeros((h, w, 1), np.uint8)
+        if self.obstacles_without_targets:
+            cv2.drawContours(binary_map, self.obstacles_without_targets, -1, 255, -1)
+
+        return binary_map
 
 class Camera:
     def __init__(self, id, camera_parameters_file):
@@ -260,6 +281,9 @@ def main():
     while 1:
         #x, y, orientation, contours= camera.get_robot_pose()
         camera.process_image()
+        map = camera.get_map()
+        cv2.imshow("map", map)
+
         k = cv2.waitKey(1) & 0xFF
         if k == ord('q'):
             break
