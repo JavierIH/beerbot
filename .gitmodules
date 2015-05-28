@@ -1,0 +1,3 @@
+[submodule "software/sandbox/platano"]
+	path = software/sandbox/platano
+	url = https://github.com/JavierIH/platano.git

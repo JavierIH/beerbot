@@ -8,7 +8,7 @@ Created on Sat May 23 17:47:20 2015
 import serial
 from Bluetooth import Bluetooth
 
-class BeerBot:
+class Beerbot:
 
     def __init__(self):
         self.interface = Bluetooth()
@@ -20,6 +20,18 @@ class BeerBot:
         self.interface.disconnect()
         
     def move(self, left_speed, right_speed):
+        
+        if left_speed>1:
+            left_speed=1
+        elif left_speed<-1:
+            left_speed=-1
+        
+        if right_speed>1:
+            right_speed=1
+        elif right_speed<-1:
+            right_speed=-1
+            
+            
         
         if left_speed >= 0:
             left_data = left_speed * 127 
@@ -40,15 +52,12 @@ class BeerBot:
     def closeGripper(self):
         self.interface.send('Aa')
         
-        
-
-
 
 # If the script is run directly, this example is executed:
 if __name__ == "__main__":
     import time as t
  
-    beerbot = BeerBot()
+    beerbot = Beerbot()
     beerbot.connect("/dev/rfcomm0", 19200)
     beerbot.move(0,0)
     beerbot.closeGripper()

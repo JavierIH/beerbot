@@ -3,15 +3,14 @@
 
 """
 import time
-import vrep
 import numpy as np
-from Camera import Camera
+#from Camera import Camera
 from Beerbot import Beerbot
 
 
 class Control:
-    def __init__(self, port, baudrate):
-        self.camera = Camera()
+    def __init__(self, port, baudrate, camera):
+        self.camera = camera
         self.robot = Beerbot()
         print ('Program started')
         self.robot.connect(port,baudrate)
@@ -26,26 +25,27 @@ class Control:
 
     def getRobotPosition(self):
         "get the position of the robot"
-        x, y, orientation = self.camera.get_robot_pose()
+        x = self.camera.robot[0][0]
+        y = self.camera.robot[0][1]
         #time.sleep(0.1)
         return x, y
 
     def getRobotOrientation(self):
         "get the orientation of the robot"
-        x, y, orientation = self.camera.get_robot_pose()
-        return orientation
+        orientation = self.camera.robot[1]
+                
+        return orientation*180/3.14159265
 
     def printRobotLocation(self):
         "print the position and orientation of the robot (x, y, yaw)"
-        pos_x, pos_y, orientation = self.camera.get_robot_pose()
-        yaw='%.2f'%(orientation)
-        x='%.2f'%(pos_x)
-        y='%.2f'%(pos_y)
+        x = self.camera.robot[0][0]
+        y = self.camera.robot[0][1]
+        yaw = self.camera.robot[1]
         print "Position: (", x,",", y, ")", "\nYaw:", yaw
-
+            
     def getDistanceToTarget (self, x_target, y_target):
         "gets the distance from the robot to a given target"
-        x_robot, y_robot, angle_robot = self.getRobotPosition()
+        x_robot, y_robot = self.getRobotPosition()
         return np.sqrt((x_target-x_robot)**2+(y_target-y_robot)**2)
 
     def getDifferenceToTargetAngle (self, angle):
@@ -72,46 +72,46 @@ class Control:
 
     def turnToTargetAngle (self, target_angle):
         "Orientates robot to a given angle in the range from -180 to 180"
-        while np.abs(self.getDifferenceToTargetAngle(target_angle)) > 1:
+        while np.abs(self.getDifferenceToTargetAngle(target_angle)) > 5:
+            self.camera.process_image()
             amp = self.getDifferenceToTargetAngle(target_angle)
-            left_motor=amp/20
-            right_motor=-amp/20
+            left_motor=amp/200
+            right_motor=-amp/200
             self.robot.move(left_motor,right_motor)
-            #print "Distancia al angulo objetivo: ", getRobotOrientation()
+            time.sleep(0.2)            
+            print "Angulo actual: ", self.getRobotOrientation()
         self.robot.move(0,0)
         return 0
 
     def goToTarget (self, target_x,target_y):
         while(self.getDistanceToTarget(target_x, target_y)>0.10):
             self.turnToTargetAngle (self.getTargetAngle(target_x,target_y))
-            self.robot.move(1,1)
+            self.robot.move(0.5,0.5)
             time.sleep(0.2)
             print self.getDistanceToTarget(target_x, target_y)
 
         print "punto!"
         self.robot.move(0,0)
 
-    def getImage (self):
-        #errorCode, resolution, image=vrep.simxGetVisionSensorImage(self.clientID, self.camera, 0, vrep.simx_opmode_streaming)
-        #print "pillando imagen"
-        #time.sleep(1) #necesario
-        errorCode, resolution, image=vrep.simxGetVisionSensorImage(self.clientID, self.camera, 0, vrep.simx_opmode_oneshot_wait)
-        im=np.array(image, dtype=np.uint8)
-        im.resize([resolution[1], resolution[0],3])
-        im=np.flipud(im)
-        return im
-
-
-if __name__ == '__main__':
-    #moveRobot(-0.5,0.5);4
-
-    import cv2
-
-    address='127.0.0.1'
-    port=19999
-    simulator = Simulator(address,port)
-
-    vision = simulator.getImage()
-
-    cv2.imshow("image", vision)
-    cv2.waitKey(500);
+if __name__ == "__main__":
+    import time as t
+    from Camera import Camera2
+ 
+    camera = Camera2(1, './CameraCalibration/logitech/calibration_image.npz')
+    controller = Control("/dev/rfcomm0", 19200, camera) 
+    
+    camera.process_image()
+        
+    controller.turnToTargetAngle(-90)
+    controller.robot.move(0,0)
+    controller.robot.move(0,0)
+    controller.robot.move(0,0)
+    controller.robot.move(0,0)
+    controller.robot.move(0,0)
+    controller.robot.move(0,0)
+ 
+ 
+   
+       
+    #beerbot.disconnect()
+    print "done!"
