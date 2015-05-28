@@ -4,13 +4,13 @@
 """
 import time
 import numpy as np
-from Camera import Camera
+#from Camera import Camera
 from Beerbot import Beerbot
 
 
 class Control:
-    def __init__(self, port, baudrate):
-        self.camera = Camera()
+    def __init__(self, port, baudrate, camera):
+        self.camera = camera
         self.robot = Beerbot()
         print ('Program started')
         self.robot.connect(port,baudrate)
@@ -89,18 +89,3 @@ class Control:
 
         print "punto!"
         self.robot.move(0,0)
-
-
-if __name__ == '__main__':
-    #moveRobot(-0.5,0.5);4
-
-    import cv2
-
-    address='127.0.0.1'
-    port=19999
-    #simulator = Simulator(address,port)
-
-    vision = simulator.getImage()
-
-    cv2.imshow("image", vision)
-    cv2.waitKey(500);

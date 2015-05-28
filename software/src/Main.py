@@ -7,16 +7,13 @@ Created on --- May  ------- 2015
 
 import time
 import cv2
-from Planner import Planner
-from Camera import Camera
+from platano.algorithm.Planner import Planner as Planner
+from Camera import Camera2
 from Control import Control
 
-camera = Camera()
+camera = Camera2(1, './CameraCalibration/logitech/calibration_image.npz')
 
-address='127.0.0.1'
-port=19999
-
-controller = Control(address, port)
+controller = Control("/dev/rfcomm0", 19200, camera)
 
 camera.process_image()
 

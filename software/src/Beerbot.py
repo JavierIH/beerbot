@@ -8,7 +8,7 @@ Created on Sat May 23 17:47:20 2015
 import serial
 from Bluetooth import Bluetooth
 
-class BeerBot:
+class Beerbot:
 
     def __init__(self):
         self.interface = Bluetooth()
@@ -48,7 +48,7 @@ class BeerBot:
 if __name__ == "__main__":
     import time as t
  
-    beerbot = BeerBot()
+    beerbot = Beerbot()
     beerbot.connect("/dev/rfcomm0", 19200)
     beerbot.move(0,0)
     beerbot.closeGripper()
