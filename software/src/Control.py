@@ -33,7 +33,8 @@ class Control:
     def getRobotOrientation(self):
         "get the orientation of the robot"
         orientation = self.camera.robot[1]
-        return orientation
+                
+        return orientation*180/3.14159265
 
     def printRobotLocation(self):
         "print the position and orientation of the robot (x, y, yaw)"
@@ -41,10 +42,10 @@ class Control:
         y = self.camera.robot[0][1]
         yaw = self.camera.robot[1]
         print "Position: (", x,",", y, ")", "\nYaw:", yaw
-
+            
     def getDistanceToTarget (self, x_target, y_target):
         "gets the distance from the robot to a given target"
-        x_robot, y_robot, angle_robot = self.getRobotPosition()
+        x_robot, y_robot = self.getRobotPosition()
         return np.sqrt((x_target-x_robot)**2+(y_target-y_robot)**2)
 
     def getDifferenceToTargetAngle (self, angle):
@@ -71,21 +72,46 @@ class Control:
 
     def turnToTargetAngle (self, target_angle):
         "Orientates robot to a given angle in the range from -180 to 180"
-        while np.abs(self.getDifferenceToTargetAngle(target_angle)) > 1:
+        while np.abs(self.getDifferenceToTargetAngle(target_angle)) > 5:
+            self.camera.process_image()
             amp = self.getDifferenceToTargetAngle(target_angle)
-            left_motor=amp/20
-            right_motor=-amp/20
+            left_motor=amp/200
+            right_motor=-amp/200
             self.robot.move(left_motor,right_motor)
-            #print "Distancia al angulo objetivo: ", getRobotOrientation()
+            time.sleep(0.2)            
+            print "Angulo actual: ", self.getRobotOrientation()
         self.robot.move(0,0)
         return 0
 
     def goToTarget (self, target_x,target_y):
         while(self.getDistanceToTarget(target_x, target_y)>0.10):
             self.turnToTargetAngle (self.getTargetAngle(target_x,target_y))
-            self.robot.move(1,1)
+            self.robot.move(0.5,0.5)
             time.sleep(0.2)
             print self.getDistanceToTarget(target_x, target_y)
 
         print "punto!"
         self.robot.move(0,0)
+
+if __name__ == "__main__":
+    import time as t
+    from Camera import Camera2
+ 
+    camera = Camera2(1, './CameraCalibration/logitech/calibration_image.npz')
+    controller = Control("/dev/rfcomm0", 19200, camera) 
+    
+    camera.process_image()
+        
+    controller.turnToTargetAngle(-90)
+    controller.robot.move(0,0)
+    controller.robot.move(0,0)
+    controller.robot.move(0,0)
+    controller.robot.move(0,0)
+    controller.robot.move(0,0)
+    controller.robot.move(0,0)
+ 
+ 
+   
+       
+    #beerbot.disconnect()
+    print "done!"

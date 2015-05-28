@@ -27,7 +27,10 @@ class Camera2:
         self.debug = True # Set to false to disable debug
 
     def process_image(self):
-        ret, self.image = self.camera.read()
+        success, self.image = self.camera.read()
+        if not success:
+            raise Exception("Camera could not be opened")
+            
         hsv = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
 
         green_mask = self.color_segmentation(hsv, 'green')

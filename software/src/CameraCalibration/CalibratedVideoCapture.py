@@ -16,9 +16,21 @@ class CalibratedVideoCapture:
 
     def open(self, id, camera_parameters_file):
         # Start device
+            
+            
         self.videoCapture = cv2.VideoCapture()
+
+        
+        
+        
         if not self.videoCapture.open(id):
             print "Could not open device"
+            
+            
+        self.videoCapture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 1280)
+        self.videoCapture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 720)        
+        
+        
 
         # Load camera parameters
         npz_file = np.load(camera_parameters_file)

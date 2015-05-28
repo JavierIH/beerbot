@@ -21,6 +21,18 @@ class Beerbot:
         
     def move(self, left_speed, right_speed):
         
+        if left_speed>1:
+            left_speed=1
+        elif left_speed<-1:
+            left_speed=-1
+        
+        if right_speed>1:
+            right_speed=1
+        elif right_speed<-1:
+            right_speed=-1
+            
+            
+        
         if left_speed >= 0:
             left_data = left_speed * 127 
         else: 
@@ -40,9 +52,6 @@ class Beerbot:
     def closeGripper(self):
         self.interface.send('Aa')
         
-        
-
-
 
 # If the script is run directly, this example is executed:
 if __name__ == "__main__":

@@ -16,11 +16,21 @@ camera = Camera2(1, './CameraCalibration/logitech/calibration_image.npz')
 controller = Control("/dev/rfcomm0", 19200, camera)
 
 camera.process_image()
+camera.process_image()
+camera.process_image()
+camera.process_image()
+camera.process_image()
+camera.process_image()
+camera.process_image()
+camera.process_image()
 
-image_bin = camera.getImage()
+image_bin = camera.get_map()
 
 start = [0,0]
 
+if not camera.robot:
+    raise Exception("There is no robot :(") 
+    
 start[0] = camera.robot[0][0]
 start[1] = camera.robot[0][1]
    
@@ -82,7 +92,7 @@ goal = [1,1]
 #goal[0] = int(input("Introduzca la coordenada x del punto final:"))
 #goal[1] = int(input("Introduzca la coordenada y del punto final:"))
 
-goal = camera.targets()[0][0] # primera lata, xy
+goal = camera.targets[0][0] # primera lata, xy
 
 valid_goal = planner.environment.is_valid(tuple(goal))
 
@@ -101,9 +111,9 @@ show = cv2.cvtColor(planner.environment.image, cv2.COLOR_GRAY2BGR)
 for i in range(len(path)-1):
     origin = points[path[i]]
     end = points[path[i+1]]
-    cv2.line(show, origin, end, (0, 0, 255))
+    cv2.line(show, (int(origin[0]), int(origin[1])), (int(end[0]), int(end[1])), (0, 0, 255))
 for point in points:
-    cv2.circle(show, point, 2, (255, 0, 0), 2)
+    cv2.circle(show, (int(point[0]), int(point[1])), 2, (255, 0, 0), 2)
 cv2.circle(show, points[0], 2, (0, 255, 0), 2)
 cv2.circle(show, points[len(points)-1], 2, (255, 255, 255), 2)
 cv2.imshow("Path", show)
