@@ -3,7 +3,8 @@ import cv2
 from CameraCalibration.CalibratedVideoCapture import CalibratedVideoCapture
 
 
-__author__ = 'kfrodicio'
+__author__ = 'def'
+
 
 class Camera2:
     def __init__(self, id, camera_parameters_file):
