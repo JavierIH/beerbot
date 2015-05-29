@@ -1,20 +1,33 @@
-\subsection{Calibrado del sistema de visión}
-\label{calibrado}
+\subsection{Calibración del sistema de visión}
+\label{calibracion}
 Para una correcta percepción del entorno es necesario realizar una calibración de la cámara para corregir las distorsiones producidas en la imagen por la lente y el sensor de la misma. La cámara posee dos tipos de distorsión: la radial, generada por la lente y que produce la curvatura de las líneas rectas de la imagen, y la tangencial, producida por un desalineamiento de la lente con el plano del sensor, de forma que ambos no se encuentran paralelos. La distorsión tangencial provoca que ciertas zonas de la imagen parezcan más cercanas de lo que realmente están.\\
 
-También es necesario obtener los parámetros intrínsecos \comment{propios de la cámara} y extrínsicos de la cámara \comment{posición y orientación respecto de un sistema de coordenadas 3D},\\
-
-\comment{Fórmulas surtidas que mañana clasificaré, cuando pueda pensar de forma más elocuente: }
-Radial distortion:
+Las fórmulas que modelan la distorsión radial son las siguientes:
 \[x_{corrected} = x (1 + k_1 r^2 + k_2 r^4 + k_3 r^6)\]
 \[y_{corrected} = y (1 + k_1 r^2 + k_2 r^4 + k_3 r^6)\]
+~\\
  
- Tangential distortion:
+La distorsión tangencial se modela con las siguientes fórmulas:
 \[x_{corrected} = x + \left[2 p_1 x y + p_2 (r^2 + 2 x^2) \right] \]
 \[y_{corrected} = y + \left[p_1 (r2 + 2 y^2) + 2 p_2 x y \right] \]
-  
-Intrinsic parameters:
+~\\
+
+En total, la distorsión la modelaremos con 5 parámetros: $(k_1 ~ k_2 ~ p_1 ~ p_2 ~ k_3)$\\
+
+También es necesario obtener los parámetros intrínsecos, que son propios de la cámara, como la distancia focal y el centro óptico, así como los parámetros extrínsicos de la cámara,posición y orientación respecto de un sistema de coordenadas 3D.\\
+
+La matriz de la cámara expresa estos parámteros intrínsecos en una sola matriz:
 \[camera ~matrix = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix}\]
+Donde $(f_x, f_y)$ son las distancias focales en los ejes x e y, y  las coordenadas del centro óptico son $(c_x, c_y)$.\\
+
+Para realizar la calibración de la cámara es necesario un patrón de calibración como el de la figura \ref{fig:patron_calibracion}, de dimensiones conocidas. Las bibliotecas OpenCV poseen funciones capaces de reconocer y detectar automáticamente los vértices de los cuadrados y, conociendo su posición dentro del patrón y las dimensiones del mismo en la realidad, calcular los parámetros de la cámara.\\
+
+El proceso es el siguiente. En primer lugar se coloca la cámara fija y se realizan una serie de fotos del patrón de calibración en distintas posiciones y orientaciones. Se extraen de estas imágenes los puntos correspondientes a los vértices de los cuadrados del patrón (figura \ref{fig:deteccion_patron}), que OpenCV usa para calcular tanto los parámetros de la distorsión como los parámetros intrínsecos de la cámara.\\
+
+Una vez obtenidos estos parámetros, se almacenan en un archivo de forma que puedan ser cargados posteriormente. Usando estos archivos, es posible rectificar la imagen para eliminar la distorsión usando la función undistort de OpenCV, y posteriormente se recorta la región de interés de la imagen.\\
+
+
+
 \subsection{Procesamiento del entorno}
 \label{procesamiento}
 
@@ -24,7 +37,9 @@ El entorno es captado a través de una cámara cenital, fijada a una estructura 
 
 Para la detección de obstáculos se utiliza una segmentación del color verde, aplicando una umbralización en el espacio de color HSV. La máscara resultante se procesa con una apertura usando un kernel rectangular de 5x5 píxeles, para reducir el ruido, y se lleva a cabo un etiquetado de objetos sobre la imagen binaria filtrada. Estos contornos, posteriormente, son también filtrados por tamaño y área, y simplificados.\\
 
-El marcador del robot se extrae mediante una segmentación del color azul, llevada a cabo también umbralizando en el espacio HSV y realizando el mismo filtrado que en el caso del color verde. Para una detección robusta del color negro del marcador, y para evitar reflejos producidos por una iluminación \comment{poco favorecedora}, el marcador completo se detecta buscando entre los obstáculos detectados el que posea un rectángulo azul en su interior, que es identificado y etiquetado como robot.\\ 
+A partir de los contornos de estos obstáculos se genera una imagen binaria que es utilizada como mapa para el algoritmo de planificación.\\
+
+El marcador del robot se extrae mediante una segmentación del color azul, llevada a cabo también umbralizando en el espacio HSV y realizando el mismo filtrado que en el caso del color verde. Para una detección robusta del color negro del marcador, y para evitar reflejos producidos por una iluminación no controlada, el marcador completo se detecta buscando entre los obstáculos detectados el que posea un rectángulo azul en su interior, que es identificado y etiquetado como robot.\\ 
 
 La posición del robot se obtiene calculando el centro del contorno del robot, y la orientación usando el vector que conecta el centro de dicho contorno con el centro del contorno azul, midiendo su orientación con respecto al eje X.\\
 
