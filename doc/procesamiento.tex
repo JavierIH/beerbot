@@ -1,2 +1,31 @@
+\subsection{Calibrado del sistema de visión}
+\label{calibrado}
+Para una correcta percepción del entorno es necesario realizar una calibración de la cámara para corregir las distorsiones producidas en la imagen por la lente y el sensor de la misma. La cámara posee dos tipos de distorsión: la radial, generada por la lente y que produce la curvatura de las líneas rectas de la imagen, y la tangencial, producida por un desalineamiento de la lente con el plano del sensor, de forma que ambos no se encuentran paralelos. La distorsión tangencial provoca que ciertas zonas de la imagen parezcan más cercanas de lo que realmente están.\\
+
+También es necesario obtener los parámetros intrínsecos \comment{propios de la cámara} y extrínsicos de la cámara \comment{posición y orientación respecto de un sistema de coordenadas 3D},\\
+
+\comment{Fórmulas surtidas que mañana clasificaré, cuando pueda pensar de forma más elocuente: }
+Radial distortion:
+\[x_{corrected} = x (1 + k_1 r^2 + k_2 r^4 + k_3 r^6)\]
+\[y_{corrected} = y (1 + k_1 r^2 + k_2 r^4 + k_3 r^6)\]
+ 
+ Tangential distortion:
+\[x_{corrected} = x + \left[2 p_1 x y + p_2 (r^2 + 2 x^2) \right] \]
+\[y_{corrected} = y + \left[p_1 (r2 + 2 y^2) + 2 p_2 x y \right] \]
+  
+Intrinsic parameters:
+\[camera ~matrix = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix}\]
 \subsection{Procesamiento del entorno}
 \label{procesamiento}
+
+El primer paso del algoritmo de planificación y control es la extracción de información del entorno a través de visión artificial. Al no poseer ningún tipo de sensor, toda la información que posee el controlador del robot se obtiene a través del sistema de visión.\\
+
+El entorno es captado a través de una cámara cenital, fijada a una estructura de soporte (figura \ref{foto_estructura_nave}). El suelo del entorno, un escenario del concurso CEABOT, está pintado de un llamativo tono de verde. Para su localización, el robot lleva en su parte superior un marcador fiduciario formado por un rectángulo de dos colores, negro y azul (figura \ref{marcador_fiduciario}). Al poseer dos colores es posible extraer tanto la posición como la orientación del robot a través de la cámara.\\
+
+Para la detección de obstáculos se utiliza una segmentación del color verde, aplicando una umbralización en el espacio de color HSV. La máscara resultante se procesa con una apertura usando un kernel rectangular de 5x5 píxeles, para reducir el ruido, y se lleva a cabo un etiquetado de objetos sobre la imagen binaria filtrada. Estos contornos, posteriormente, son también filtrados por tamaño y área, y simplificados.\\
+
+El marcador del robot se extrae mediante una segmentación del color azul, llevada a cabo también umbralizando en el espacio HSV y realizando el mismo filtrado que en el caso del color verde. Para una detección robusta del color negro del marcador, y para evitar reflejos producidos por una iluminación \comment{poco favorecedora}, el marcador completo se detecta buscando entre los obstáculos detectados el que posea un rectángulo azul en su interior, que es identificado y etiquetado como robot.\\ 
+
+La posición del robot se obtiene calculando el centro del contorno del robot, y la orientación usando el vector que conecta el centro de dicho contorno con el centro del contorno azul, midiendo su orientación con respecto al eje X.\\
+
+Por último, para la detección de la lata, se comprueban todos los obstáculos buscando aquellos que tengan forma circular. Esta forma circular se calcula teniendo en cuenta la proporción entre el área del contorno y el área del menor circulo que incluye el contorno, que es aproximadamente 1 en el caso de que el contorno sea totalmente circular. Para que la segmentación no etiquete obstáculos circulares como latas, se realiza también un filtrado de candidatos por tamaño, reduciendo así el número de posibles falsos positivos.\\
