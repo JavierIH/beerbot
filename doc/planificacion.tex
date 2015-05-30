@@ -34,7 +34,7 @@ En ambos casos, la función $r_p(i)$ se obtiene  escribiendo los dígitos de la 
 
 \[ r_p(i) = \frac{a_0}{p} + \frac{a_1}{p^2} + \frac{a_2}{p^3} + \frac{a_3}{p^4} + ...\]\\
 
-Para la implementación, se ha usado una biblioteca ya existente, perteneciente al paquete cgkit que proporciona estos conjuntos de puntos de manera cómoda y rápida, ahorrando tiempo de desarrollo y depuración de errores. La figura \ref{fig:muestreo} muestra una comparativa de los distintos métodos de generación de puntos de muestreo en un escenario ficticio.\\
+La figura \ref{fig:muestreo} muestra una comparativa de los distintos métodos de generación de puntos de muestreo sobre el escenario del CEABOT usado como entorno de trabajo. \\
 
 \begin{figure}[h]
 		\centering
@@ -60,3 +60,23 @@ Para la implementación, se ha usado una biblioteca ya existente, perteneciente 
         \end{subfigure}
         \caption{Comparativa de los distintos modos de muestreo del espacio libre}\label{fig:muestreo}
 \end{figure}
+
+\comment{Cambiar figura \ref{fig:muestreo}\\}
+
+La distribución elegida fue la de Hammersley (figura \ref{fig:muestreo_hammersley}), debido a una mayor dispersión, de forma que la conectividad de la hoja de ruta era mayor.\\
+
+Una vez generados los puntos para el muestreo del espacio libre, se comprueba cada uno de los puntos comprobando colisiones con los obstáculos. Para ello se utiliza un detector de colisiones basado en convolución: para reducir el tiempo de cómputo de colisiones con el modelo del robot, se aplica primero la convolución del círculo que representa al robot sobre toda la imagen, de forma que los obstáculos se dilatan. De esta forma se puede usar la detección de colisión simple, mucho más rápida, sobre los obstáculos dilatados.\\
+
+Tras eliminar los nodos que colisionan con obstáculos, se prodece a la conexión de los distintos nodos para la generación del grafo de la hoja de ruta. El criterio seguido para conectar dos nodos es su vecindad. Se consideran vecinos dos nodos que estén a una distancia entre ellos menor que un valor umbral. Para cada pareja de nodos se calcula la distancia y se coloca en una matriz que reprensenta la conectividad del grafo, y que es usada como entrada de un algoritmo de búsqueda en grafos como Djisktra o $A^*$. Al ser la distancia del nodo A al nodo B la misma que la del nodo B al nodo A, sólo se calculan las distancias una vez.\\
+
+Por último, y antes de añadir cada conexión a la hoja de ruta, se comprueba si esa arista del grafo es una trayectoria válida para el robot o colisiona con algún obstáculo, y sólo se añade en caso de que sea válida. Para la comprobación de la arista, se discretiza en diversos puntos, y se comprueba cada uno de ellos con alguno de los métodos presentados anteriormente.\\
+
+Una vez se ha muestreado el espacio libre y se han conectado los nodos entre si para generar un grafo, el siguiente paso es buscar el camino más corto. Para ello nuestra librería \comment{\textit{PLATANO}} se dispone de dos algoritmos diferentes, el $A^*$ y el Dijkstra.\\
+
+El algoritmo de Dijkstra \comment{...} es un método para encontrar el camino mas corto desde un nodo hasta todos los demás nodos de un grafo, aunque se suele usar para encontrar el camino más corto entre dos nodos, que para el algoritmo cuando se ha encontrado ese camino. En este algoritmo, el coste de cada nodo (tambien llamado prioridad) se calcula como la distancia entre éste y el nodo inicial, manteniendo una lista de nodos visitados y una de nodos por visitar. De esta forma se recorre el grafo viajando siempre por los nodos de menor distancia hasta que se encuentra un nodo anterior con menor distancia o se llega hasta el nodo objetivo. y revisar \\
+
+El algoritmo $A^*$, una evolución del algoritmo de Dijkstra, busca devolver la trayectoria que vaya del nodo inicial al final y que presente un coste más bajo. Mientras va explorando un camino mantiene otras posibles soluciones para cambiar de trayectoria, en caso de que la que se está recorriendo deje de ser óptima. Este algoritmo garantiza que siempre se encontrará una solución, si existe alguna.\\
+
+El coste que se emplea para comparar las distintas posibles trayectorias entre sí viene dado por la suma de dos funciones. La primera es la distancia recorrida entre el nodo inicial y el nodo para el cual se está calculando el coste, mientras que la segunda consiste en una estimación de la distancia que es necesario recorrer para llegar al punto de destino. Aunque esto último se puede representar de diversas maneras, lo mas común es calcular la distancia en linea recta desde el nodo actual hasta el final.\\
+
+Una vez obtenida la trayectoria como una secuencia de puntos por los que el robot debe pasar hasta llegar a la meta, estos puntos son pasados al controlador del robot para que realice el movimiento hasta la lata.\\
