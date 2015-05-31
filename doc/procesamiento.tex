@@ -22,7 +22,21 @@ Donde $(f_x, f_y)$ son las distancias focales en los ejes x e y, y  las coordena
 
 Para realizar la calibración de la cámara es necesario un patrón de calibración como el de la figura \ref{fig:patron_calibracion}, de dimensiones conocidas. Las bibliotecas OpenCV poseen funciones capaces de reconocer y detectar automáticamente los vértices de los cuadrados y, conociendo su posición dentro del patrón y las dimensiones del mismo en la realidad, calcular los parámetros de la cámara.\\
 
+\begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{images/pattern.png}
+        \caption{Patrón de calibración proporcionado por OpenCV}
+        \label{fig:patron_calibracion}
+\end{figure} 
+
 El proceso es el siguiente. En primer lugar se coloca la cámara fija y se realizan una serie de fotos del patrón de calibración en distintas posiciones y orientaciones. Se extraen de estas imágenes los puntos correspondientes a los vértices de los cuadrados del patrón (figura \ref{fig:deteccion_patron}), que OpenCV usa para calcular tanto los parámetros de la distorsión como los parámetros intrínsecos de la cámara.\\
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{images/calibration_pattern_detected.png}
+        \caption{OpenCV detectando el patrón de calibración}
+        \label{fig:deteccion_patron}
+\end{figure} 
 
 Una vez obtenidos estos parámetros, se almacenan en un archivo de forma que puedan ser cargados posteriormente. Usando estos archivos, es posible rectificar la imagen para eliminar la distorsión usando la función undistort de OpenCV, y posteriormente se recorta la región de interés de la imagen.\\
 
@@ -33,14 +47,44 @@ Una vez obtenidos estos parámetros, se almacenan en un archivo de forma que pue
 
 El primer paso del algoritmo de planificación y control es la extracción de información del entorno a través de visión artificial. Al no poseer ningún tipo de sensor, toda la información que posee el controlador del robot se obtiene a través del sistema de visión.\\
 
-El entorno es captado a través de una cámara cenital, fijada a una estructura de soporte (figura \ref{foto_estructura_nave}). El suelo del entorno, un escenario del concurso CEABOT, está pintado de un llamativo tono de verde. Para su localización, el robot lleva en su parte superior un marcador fiduciario formado por un rectángulo de dos colores, negro y azul (figura \ref{marcador_fiduciario}). Al poseer dos colores es posible extraer tanto la posición como la orientación del robot a través de la cámara.\\
+\begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{images/escenario.jpg}
+        \caption{David colocando la estructura de soporte de la cámara cenital}
+        \label{fig:foto_estructura_nave}
+\end{figure} 
+
+El entorno es captado a través de una cámara cenital, fijada a una estructura de soporte (figura \ref{fig:foto_estructura_nave}). El suelo del entorno, un escenario del concurso CEABOT, está pintado de un llamativo tono de verde. Para su localización, el robot lleva en su parte superior un marcador fiduciario formado por un rectángulo de dos colores, negro y azul (figura \ref{fig:marcador_fiduciario}). Al poseer dos colores es posible extraer tanto la posición como la orientación del robot a través de la cámara.\\
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{images/marcador.png}
+        \caption{Marcador fiduciario usado para el tracking del robot}
+        \label{fig:foto_estructura_nave}
+\end{figure} 
 
 Para la detección de obstáculos se utiliza una segmentación del color verde, aplicando una umbralización en el espacio de color HSV. La máscara resultante se procesa con una apertura usando un kernel rectangular de 5x5 píxeles, para reducir el ruido, y se lleva a cabo un etiquetado de objetos sobre la imagen binaria filtrada. Estos contornos, posteriormente, son también filtrados por tamaño y área, y simplificados.\\
 
-A partir de los contornos de estos obstáculos se genera una imagen binaria que es utilizada como mapa para el algoritmo de planificación.\\
+A partir de los contornos de estos obstáculos se genera una imagen binaria que es utilizada como mapa para el algoritmo de planificación (figura \ref{fig:map}).\\
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{images/map.png}
+        \caption{Mapa del entorno obtenido a partir de los contornos de los obstáculos segmentados.}
+        \label{fig:foto_estructura_nave}
+\end{figure} 
 
 El marcador del robot se extrae mediante una segmentación del color azul, llevada a cabo también umbralizando en el espacio HSV y realizando el mismo filtrado que en el caso del color verde. Para una detección robusta del color negro del marcador, y para evitar reflejos producidos por una iluminación no controlada, el marcador completo se detecta buscando entre los obstáculos detectados el que posea un rectángulo azul en su interior, que es identificado y etiquetado como robot.\\ 
 
 La posición del robot se obtiene calculando el centro del contorno del robot, y la orientación usando el vector que conecta el centro de dicho contorno con el centro del contorno azul, midiendo su orientación con respecto al eje X.\\
 
 Por último, para la detección de la lata, se comprueban todos los obstáculos buscando aquellos que tengan forma circular. Esta forma circular se calcula teniendo en cuenta la proporción entre el área del contorno y el área del menor circulo que incluye el contorno, que es aproximadamente 1 en el caso de que el contorno sea totalmente circular. Para que la segmentación no etiquete obstáculos circulares como latas, se realiza también un filtrado de candidatos por tamaño, reduciendo así el número de posibles falsos positivos.\\
+
+La figura \ref{fig:segmentation} muestra el resultado de la segmentación. Los contornos amarillos indican los obstáculos, los círculos azules son las latas (objetivos) detectadas y el rectángulo magenta rodea al robot, cuya orientación queda indicada con una línea cyan.\\
+
+\begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{images/segmentation.png}
+        \caption{Resultado de la segmentación}
+        \label{fig:segmentation}
+\end{figure} 

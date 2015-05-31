@@ -40,28 +40,26 @@ La figura \ref{fig:muestreo} muestra una comparativa de los distintos métodos d
 		\centering
         \begin{subfigure}[b]{0.3\textwidth}
                 \centering
-                \includegraphics[width=\textwidth]{images/random.png}
+                \includegraphics[width=\textwidth]{images/random-beer.png}
                 \caption{Muestreo aleatorio}
                 \label{fig:muestreo_aleatorio}
         \end{subfigure}
         ~
         \begin{subfigure}[b]{0.3\textwidth}
                 \centering
-                \includegraphics[width=\textwidth]{images/hammersley.png}
+                \includegraphics[width=\textwidth]{images/hammersley-beer.png}
                 \caption{Muestreo con puntos Hammersley}
                 \label{fig:muestreo_hammersley}
         \end{subfigure}
         ~
         \begin{subfigure}[b]{0.3\textwidth}
          	   \centering
-                \includegraphics[width=\textwidth]{images/halton.png}
+                \includegraphics[width=\textwidth]{images/halton-beer.png}
                 \caption{Muestreo con puntos Halton}
                 \label{fig:muestreo_halton}
         \end{subfigure}
         \caption{Comparativa de los distintos modos de muestreo del espacio libre}\label{fig:muestreo}
 \end{figure}
-
-\comment{Cambiar figura \ref{fig:muestreo}\\}
 
 La distribución elegida fue la de Hammersley (figura \ref{fig:muestreo_hammersley}), debido a una mayor dispersión, de forma que la conectividad de la hoja de ruta era mayor.\\
 
@@ -69,11 +67,18 @@ Una vez generados los puntos para el muestreo del espacio libre, se comprueba ca
 
 Tras eliminar los nodos que colisionan con obstáculos, se prodece a la conexión de los distintos nodos para la generación del grafo de la hoja de ruta. El criterio seguido para conectar dos nodos es su vecindad. Se consideran vecinos dos nodos que estén a una distancia entre ellos menor que un valor umbral. Para cada pareja de nodos se calcula la distancia y se coloca en una matriz que reprensenta la conectividad del grafo, y que es usada como entrada de un algoritmo de búsqueda en grafos como Djisktra o $A^*$. Al ser la distancia del nodo A al nodo B la misma que la del nodo B al nodo A, sólo se calculan las distancias una vez.\\
 
-Por último, y antes de añadir cada conexión a la hoja de ruta, se comprueba si esa arista del grafo es una trayectoria válida para el robot o colisiona con algún obstáculo, y sólo se añade en caso de que sea válida. Para la comprobación de la arista, se discretiza en diversos puntos, y se comprueba cada uno de ellos con alguno de los métodos presentados anteriormente.\\
+Por último, y antes de añadir cada conexión a la hoja de ruta, se comprueba si esa arista del grafo es una trayectoria válida para el robot o colisiona con algún obstáculo, y sólo se añade en caso de que sea válida. Para la comprobación de la arista, se discretiza en diversos puntos, y se comprueba cada uno de ellos con alguno de los métodos presentados anteriormente. La hoja de ruta resultante se muestra en la figura \ref{fig:hoja_ruta}\\
 
-Una vez se ha muestreado el espacio libre y se han conectado los nodos entre si para generar un grafo, el siguiente paso es buscar el camino más corto. Para ello nuestra librería \comment{\textit{PLATANO}} se dispone de dos algoritmos diferentes, el $A^*$ y el Dijkstra.\\
+\begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{images/roadmap.png}
+        \caption{Hoja de ruta resultante sobre un mapa real extraído del escenario.}
+        \label{fig:hoja_ruta}
+\end{figure} 
 
-El algoritmo de Dijkstra \comment{...} es un método para encontrar el camino mas corto desde un nodo hasta todos los demás nodos de un grafo, aunque se suele usar para encontrar el camino más corto entre dos nodos, que para el algoritmo cuando se ha encontrado ese camino. En este algoritmo, el coste de cada nodo (tambien llamado prioridad) se calcula como la distancia entre éste y el nodo inicial, manteniendo una lista de nodos visitados y una de nodos por visitar. De esta forma se recorre el grafo viajando siempre por los nodos de menor distancia hasta que se encuentra un nodo anterior con menor distancia o se llega hasta el nodo objetivo. y revisar \\
+Una vez se ha muestreado el espacio libre y se han conectado los nodos entre si para generar un grafo, el siguiente paso es buscar el camino más corto. Para ello nuestra librería \textit{PLATANO} \footnote{https://github.com/JavierIH/platano} se dispone de dos algoritmos diferentes, el $A^*$ y el Dijkstra.\\
+
+El algoritmo de Dijkstra es un método para encontrar el camino mas corto desde un nodo hasta todos los demás nodos de un grafo, aunque se suele usar para encontrar el camino más corto entre dos nodos, que detine el algoritmo cuando se ha encontrado ese camino. En este algoritmo, el coste de cada nodo (tambien llamado prioridad) se calcula como la distancia entre éste y el nodo inicial, manteniendo una lista de nodos visitados y una de nodos por visitar. De esta forma se recorre el grafo viajando siempre por los nodos de menor distancia hasta que se encuentra un nodo anterior con menor distancia o se llega hasta el nodo objetivo. y revisar \\
 
 El algoritmo $A^*$, una evolución del algoritmo de Dijkstra, busca devolver la trayectoria que vaya del nodo inicial al final y que presente un coste más bajo. Mientras va explorando un camino mantiene otras posibles soluciones para cambiar de trayectoria, en caso de que la que se está recorriendo deje de ser óptima. Este algoritmo garantiza que siempre se encontrará una solución, si existe alguna.\\
 
