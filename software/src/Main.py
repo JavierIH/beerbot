@@ -61,7 +61,7 @@ cv2.circle(image_bin, tuple(start), 2, 0, 40)
 #
 ##############################################################################################
 
-planner = Planner(image_bin, 'Hammersley', 400, 50, 'dilate', 16)
+planner = Planner(image_bin, 'Hammersley', 200, 50, 'dilate', 50)
 
 
 show = cv2.cvtColor(planner.environment.image, cv2.COLOR_GRAY2BGR)
@@ -104,7 +104,7 @@ valid_goal = planner.environment.is_valid(tuple(goal))
 
 # Calculate path
 #path, points = planner.find_path_and_simplify(tuple(start), tuple(goal))
-path, points = planner.find_path(tuple(start), tuple(goal))
+path, points = planner.find_path_and_simplify(tuple(start), tuple(goal), 'dijkstra')
 
 # Draw paths
 show = cv2.cvtColor(planner.environment.image, cv2.COLOR_GRAY2BGR)
@@ -130,14 +130,16 @@ for i in path:
     
     camera.process_image()
 
-    while(controller.getDistanceToTarget(points[i][0], points[i][1])>0.10):
+    while(controller.getDistanceToTarget(points[i][0], points[i][1])>30):
         camera.process_image()
+        print "ANGULO OBJETIVO:", controller.getTargetAngle(points[i][0],points[i][1])
         controller.turnToTargetAngle (controller.getTargetAngle(points[i][0],points[i][1]))
-        controller.robot.move(1,1)
-        time.sleep(0.1)
-        print controller.getDistanceToTarget(points[i][0], points[i][1])
+        controller.robot.move(0.2,0.2)
+        time.sleep(0.3)
+        print "DISTANCIA AL PUNTO OBJETIVO: " , controller.getDistanceToTarget(points[i][0], points[i][1])
 
     print "punto!"
     controller.robot.move(0,0)
     
-
+controller.robot.openGripper()
+controller.robot.move(-1,-1)

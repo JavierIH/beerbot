@@ -14,6 +14,8 @@ class Control:
         self.robot = Beerbot()
         print ('Program started')
         self.robot.connect(port,baudrate)
+        
+        
         #if self.clientID!=-1:
         #    print "Conexion establecida"
         #else:
@@ -41,7 +43,7 @@ class Control:
         x = self.camera.robot[0][0]
         y = self.camera.robot[0][1]
         yaw = self.camera.robot[1]
-        print "Position: (", x,",", y, ")", "\nYaw:", yaw
+        print "Position: (", x,",", y, ")", "\nYaw:", yaw*180/3.14159265
             
     def getDistanceToTarget (self, x_target, y_target):
         "gets the distance from the robot to a given target"
@@ -68,22 +70,23 @@ class Control:
         angle=np.arccos(x_gap/l_gap)*180/3.14159265
         if y_gap < 0:
             angle=-angle
-        return angle
+        return angle*-1
 
     def turnToTargetAngle (self, target_angle):
         "Orientates robot to a given angle in the range from -180 to 180"
         while np.abs(self.getDifferenceToTargetAngle(target_angle)) > 5:
             self.camera.process_image()
             amp = self.getDifferenceToTargetAngle(target_angle)
-            left_motor=amp/200
-            right_motor=-amp/200
+            left_motor=-amp/140
+            right_motor=amp/140
             self.robot.move(left_motor,right_motor)
             time.sleep(0.2)            
             print "Angulo actual: ", self.getRobotOrientation()
+            print "diferencia: ", amp
         self.robot.move(0,0)
         return 0
 
-    def goToTarget (self, target_x,target_y):
+    def goToTarget (self, target_x,target_y): # funcion muerta, no usar
         while(self.getDistanceToTarget(target_x, target_y)>0.10):
             self.turnToTargetAngle (self.getTargetAngle(target_x,target_y))
             self.robot.move(0.5,0.5)
@@ -102,7 +105,15 @@ if __name__ == "__main__":
     
     camera.process_image()
         
-    controller.turnToTargetAngle(-90)
+    #controller.turnToTargetAngle(-90)
+        
+    controller.printRobotLocation()  
+
+    print "distancia a 90" , controller.getDifferenceToTargetAngle(90)      
+    print "distancia a 90" , controller.getDifferenceToTargetAngle(90)      
+     
+    controller.turnToTargetAngle(-170)     
+     
     controller.robot.move(0,0)
     controller.robot.move(0,0)
     controller.robot.move(0,0)

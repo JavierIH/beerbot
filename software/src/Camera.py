@@ -11,8 +11,12 @@ class Camera2:
         self.camera.open(id, camera_parameters_file)
 
         # Thresholds:
-        self.color_threshold = { 'blue' : [(95, 110, 55), (125, 255, 243)],
-                                 'green': [(35, 47, 70),  (84, 255, 200)],
+        #self.color_threshold = { 'blue' : [(95, 110, 55), (125, 255, 243)],
+        #                         'green': [(35, 47, 70),  (84, 255, 200)],
+        #                         'orange':[(0, 170, 55),  (32, 255, 200)],
+        #                         'brown': [(5, 5, 65),  (55, 89, 89)] }
+        self.color_threshold = { 'blue' : [(95, 90, 55), (125, 255, 243)],
+                                 'green': [(35, 37, 30),  (84, 255, 200)],
                                  'orange':[(0, 170, 55),  (32, 255, 200)],
                                  'brown': [(5, 5, 65),  (55, 89, 89)] }
         self.black_threshold = 20
@@ -52,7 +56,7 @@ class Camera2:
                     if robot_contour != None:
                         robot_center = self.contour_center(robot_contour)
                         orient_vector = np.array(blue_center) - np.array(robot_center)
-                        orientation = np.arctan2(orient_vector[1], orient_vector[0])
+                        orientation = np.arctan2(-orient_vector[1], orient_vector[0])
                         self.robot = (robot_center, orientation)
                 else:
                     self.obstacles.append(contour)
@@ -94,7 +98,7 @@ class Camera2:
         """
         thresholds = self.color_threshold[color]
         mask = cv2.inRange(hsv_image, thresholds[0], thresholds[1])
-        # cv2.imshow(color, mask)
+        cv2.imshow(color, mask)
         return mask
 
     def black_segmentation(self, hsv_image):

@@ -59,7 +59,7 @@ if __name__ == "__main__":
  
     beerbot = Beerbot()
     beerbot.connect("/dev/rfcomm0", 19200)
-    beerbot.move(0,0)
+    beerbot.move(-1,1)
     beerbot.closeGripper()
        
     #beerbot.disconnect()
