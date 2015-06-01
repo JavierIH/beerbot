@@ -6,6 +6,9 @@
 \usepackage[T1]{fontenc}	% For using icelandic Thorn character
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{pdfpages}
+
+
 
 % Support for spanish:
 \usepackage[spanish]{babel}
@@ -81,9 +84,11 @@
 \include{conclusion}
 
 %%%% Appendices %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\begin{appendices}
+\begin{appendices}
 
-%\end{appendices}
+\includepdf[pages=-]{plano.pdf}
+
+\end{appendices}
 
 %%%% Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
