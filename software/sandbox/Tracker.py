@@ -23,5 +23,5 @@ class Tracker:
             if collision.line_collides(self.current_pos[3], self.points[self.path[last_checkpoint]], self.points[self.path[last_checkpoint+1]]) == False:
                 self.control.goToTarget(self.points[self.path[last_checkpoint+1]][0], self.points[self.path[last_checkpoint+1]][1])
 
-            if self.current_pos[0] - self.points[self.path[last_checkpoint+1]][0] > thresh and self.current_pos[1] - self.points[self.path[last_checkpoint+1]][1] > thresh:
+            if self.current_pos[0] - self.points[self.path[last_checkpoint+1]][0] < thresh and self.current_pos[1] - self.points[self.path[last_checkpoint+1]][1] < thresh:
                 last_checkpoint += 1

@@ -54,13 +54,13 @@ El primer paso del algoritmo de planificación y control es la extracción de in
         \label{fig:foto_estructura_nave}
 \end{figure} 
 
-El entorno es captado a través de una cámara cenital, fijada a una estructura de soporte (figura \ref{fig:foto_estructura_nave}). El suelo del entorno, un escenario del concurso CEABOT, está pintado de un llamativo tono de verde. Para su localización, el robot lleva en su parte superior un marcador fiduciario formado por un rectángulo de dos colores, negro y azul (figura \ref{fig:marcador_fiduciario}). Al poseer dos colores es posible extraer tanto la posición como la orientación del robot a través de la cámara.\\
+El entorno es captado a través de una cámara cenital, fijada a una estructura de soporte (figura \ref{fig:foto_estructura_nave}). El suelo del entorno, un escenario del concurso CEABOT, está pintado de un llamativo tono de verde. Para su localización, el robot lleva en su parte superior un marcador fiduciario formado por un rectángulo de dos colores, negro y azul(figura \ref{fig:marcador_fiduciario}). Al poseer dos colores es posible extraer tanto la posición como la orientación del robot a través de la cámara.\\
 
 \begin{figure}[H]
         \centering
         \includegraphics[width=0.4\textwidth]{images/marcador.png}
         \caption{Marcador fiduciario usado para el tracking del robot}
-        \label{fig:foto_estructura_nave}
+        \label{fig:marcador_fiduciario}
 \end{figure} 
 
 Para la detección de obstáculos se utiliza una segmentación del color verde, aplicando una umbralización en el espacio de color HSV. La máscara resultante se procesa con una apertura usando un kernel rectangular de 5x5 píxeles, para reducir el ruido, y se lleva a cabo un etiquetado de objetos sobre la imagen binaria filtrada. Estos contornos, posteriormente, son también filtrados por tamaño y área, y simplificados.\\
@@ -71,7 +71,7 @@ A partir de los contornos de estos obstáculos se genera una imagen binaria que 
         \centering
         \includegraphics[width=0.4\textwidth]{images/map.png}
         \caption{Mapa del entorno obtenido a partir de los contornos de los obstáculos segmentados.}
-        \label{fig:foto_estructura_nave}
+        \label{fig:map}
 \end{figure} 
 
 El marcador del robot se extrae mediante una segmentación del color azul, llevada a cabo también umbralizando en el espacio HSV y realizando el mismo filtrado que en el caso del color verde. Para una detección robusta del color negro del marcador, y para evitar reflejos producidos por una iluminación no controlada, el marcador completo se detecta buscando entre los obstáculos detectados el que posea un rectángulo azul en su interior, que es identificado y etiquetado como robot.\\ 
