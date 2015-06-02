@@ -12,9 +12,9 @@ La distorsión tangencial se modela con las siguientes fórmulas:
 \[y_{corrected} = y + \left[p_1 (r2 + 2 y^2) + 2 p_2 x y \right] \]
 ~\\
 
-En total, la distorsión la modelaremos con 5 parámetros: $(k_1 ~ k_2 ~ p_1 ~ p_2 ~ k_3)$\\
+En total, la distorsión la modelaremos con 5 parámetros: $(k_1 ~ k_2 ~ k_3 ~ p_1 ~ p_2)$\\
 
-También es necesario obtener los parámetros intrínsecos, que son propios de la cámara, como la distancia focal y el centro óptico, así como los parámetros extrínsicos de la cámara,posición y orientación respecto de un sistema de coordenadas 3D.\\
+También es necesario obtener los parámetros intrínsecos, que son propios de la cámara, como la distancia focal y el centro óptico, así como los parámetros extrínsicos de la cámara: posición y orientación respecto de un sistema de coordenadas 3D.\\
 
 La matriz de la cámara expresa estos parámteros intrínsecos en una sola matriz:
 \[camera ~matrix = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix}\]
@@ -80,7 +80,7 @@ La posición del robot se obtiene calculando el centro del contorno del robot, y
 
 Por último, para la detección de la lata, se comprueban todos los obstáculos buscando aquellos que tengan forma circular. Esta forma circular se calcula teniendo en cuenta la proporción entre el área del contorno y el área del menor circulo que incluye el contorno, que es aproximadamente 1 en el caso de que el contorno sea totalmente circular. Para que la segmentación no etiquete obstáculos circulares como latas, se realiza también un filtrado de candidatos por tamaño, reduciendo así el número de posibles falsos positivos.\\
 
-La figura \ref{fig:segmentation} muestra el resultado de la segmentación. Los contornos amarillos indican los obstáculos, los círculos azules son las latas (objetivos) detectadas y el rectángulo magenta rodea al robot, cuya orientación queda indicada con una línea cyan.\\
+La figura \ref{fig:segmentation} muestra el resultado de la segmentación. Los contornos amarillos indican los obstáculos, los círculos azules son las latas (objetivos) detectadas y el rectángulo magenta rodea al robot, cuya orientación queda indicada con una línea cián.\\
 
 \begin{figure}[H]
         \centering
